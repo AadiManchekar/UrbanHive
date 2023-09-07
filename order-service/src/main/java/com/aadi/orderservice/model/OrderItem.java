@@ -11,17 +11,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "t_order_line_items")
+@Table(name = "t_order_items")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderLineItems {
+public class OrderItem {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // SKU (Stock Keeping Unit) code
   private String skuCode;
   private BigDecimal price;
   private Integer quantity;

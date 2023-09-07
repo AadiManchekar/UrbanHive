@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderLineItemsDto {
+public class OrderItemDto {
 
   private Long id;
   private String skuCode;
