@@ -4,6 +4,7 @@ import com.aadi.productservice.dto.ProductRequest;
 import com.aadi.productservice.dto.ProductResponse;
 import com.aadi.productservice.model.Product;
 import com.aadi.productservice.repository.ProductRepository;
+import com.aadi.productservice.service.ProductService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -47,6 +48,9 @@ class ProductServiceApplicationTests {
   private ObjectMapper objectMapper;
 
   @Autowired
+  private ProductService productService;
+
+  @Autowired
   private ProductRepository productRepository;
 
   @Test
@@ -79,7 +83,7 @@ class ProductServiceApplicationTests {
 
   @Test
   void shouldGetProduct() throws Exception {
-    List<Product> productResponse = getProductResponse();
+    List<ProductResponse> productResponse = getProductResponse();
 
     MvcResult result = mockMvc
       .perform(
@@ -99,8 +103,12 @@ class ProductServiceApplicationTests {
     Assertions.assertEquals(productResponse, actualResponses);
   }
 
-  private List<Product> getProductResponse() {
+  private List<ProductResponse> getProductResponse() {
     List<Product> productResponses = productRepository.findAll();
-    return productResponses;
+
+    return productResponses
+      .stream()
+      .map(productService::mapProductToProductResponse)
+      .toList();
   }
 }
