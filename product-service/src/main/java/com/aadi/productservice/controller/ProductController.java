@@ -6,6 +6,7 @@ import com.aadi.productservice.service.ProductService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,9 +22,23 @@ public class ProductController {
   private final ProductService productService;
 
   @PostMapping
-  @ResponseStatus(HttpStatus.CREATED)
-  public void createProduct(@RequestBody ProductRequest productRequest) {
+  public ResponseEntity<String> createProduct(
+    @RequestBody ProductRequest productRequest
+  ) {
+    // Check if any of the required fields are missing
+    if (
+      productRequest.getName() == null ||
+      productRequest.getDescription() == null ||
+      productRequest.getPrice() == null
+    ) {
+      return ResponseEntity
+        .badRequest()
+        .body("All fields (name, description, and price) are required.");
+    }
     productService.createProduct(productRequest);
+
+    // 201 (CREATED) response without a body
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   @GetMapping

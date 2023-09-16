@@ -1,5 +1,6 @@
 package com.aadi.productservice;
 
+import com.aadi.productservice.builder.ProductRequestBuilder;
 import com.aadi.productservice.dto.ProductRequest;
 import com.aadi.productservice.dto.ProductResponse;
 import com.aadi.productservice.model.Product;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -55,7 +57,13 @@ class ProductServiceApplicationTests {
 
   @Test
   void shouldCreateProduct() throws Exception {
-    ProductRequest productRequest = getProductRequest();
+    ProductRequest productRequest = ProductRequest
+      .builder()
+      .name("Iphone 13")
+      .description("Iphone 13")
+      .price(BigDecimal.valueOf(82000))
+      .build();
+
     String productRequestString = objectMapper.writeValueAsString(
       productRequest
     );
@@ -69,16 +77,30 @@ class ProductServiceApplicationTests {
       )
       .andExpect(MockMvcResultMatchers.status().isCreated());
 
-    Assertions.assertEquals(productRepository.findAll().size(), 1);
+    Assertions.assertEquals(1, productRepository.findAll().size());
   }
 
-  private ProductRequest getProductRequest() {
-    return ProductRequest
-      .builder()
+  @Test
+  void shouldNotCreateProduct() throws Exception {
+    // intentionally i didnt add price in here
+    ProductRequest productRequest = ProductRequestBuilder
+      .create()
       .name("Iphone 13")
       .description("Iphone 13")
-      .price(BigDecimal.valueOf(82000))
       .build();
+
+    String productRequestString = objectMapper.writeValueAsString(
+      productRequest
+    );
+
+    mockMvc
+      .perform(
+        MockMvcRequestBuilders
+          .post("/api/v1/product")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(productRequestString)
+      )
+      .andExpect(MockMvcResultMatchers.status().is(400));
   }
 
   @Test
