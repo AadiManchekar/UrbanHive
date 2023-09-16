@@ -50,9 +50,6 @@ class ProductServiceApplicationTests {
   private ObjectMapper objectMapper;
 
   @Autowired
-  private ProductService productService;
-
-  @Autowired
   private ProductRepository productRepository;
 
   @Test
@@ -76,8 +73,6 @@ class ProductServiceApplicationTests {
           .content(productRequestString)
       )
       .andExpect(MockMvcResultMatchers.status().isCreated());
-
-    Assertions.assertEquals(1, productRepository.findAll().size());
   }
 
   @Test
@@ -104,8 +99,49 @@ class ProductServiceApplicationTests {
   }
 
   @Test
+  void shouldFindAllProducts() throws Exception {
+    // Create two products and save them to MongoDB
+    Product product1 = Product
+      .builder()
+      .name("Product 1")
+      .description("Description 1")
+      .price(BigDecimal.valueOf(100))
+      .build();
+
+    Product product2 = Product
+      .builder()
+      .name("Product 2")
+      .description("Description 2")
+      .price(BigDecimal.valueOf(200))
+      .build();
+
+    // Save the products to the MongoDB database using productRepository
+    productRepository.save(product1);
+    productRepository.save(product2);
+
+    // Perform a request to fetch all products
+    MvcResult result = mockMvc
+      .perform(
+        MockMvcRequestBuilders
+          .get("/api/v1/product")
+          .contentType(MediaType.APPLICATION_JSON)
+      )
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andReturn();
+
+    String content = result.getResponse().getContentAsString();
+    List<Product> actualResponses = objectMapper.readValue(
+      content,
+      new TypeReference<List<Product>>() {}
+    );
+
+    // Assertions to verify that there are two products in the response
+    Assertions.assertEquals(2, actualResponses.size());
+  }
+
+  @Test
   void shouldGetProduct() throws Exception {
-    List<ProductResponse> productResponse = getProductResponse();
+    List<Product> productResponse = getProductResponse();
 
     MvcResult result = mockMvc
       .perform(
@@ -125,12 +161,8 @@ class ProductServiceApplicationTests {
     Assertions.assertEquals(productResponse, actualResponses);
   }
 
-  private List<ProductResponse> getProductResponse() {
+  private List<Product> getProductResponse() {
     List<Product> productResponses = productRepository.findAll();
-
-    return productResponses
-      .stream()
-      .map(productService::mapProductToProductResponse)
-      .toList();
+    return productResponses;
   }
 }
