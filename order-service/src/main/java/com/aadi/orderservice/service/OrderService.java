@@ -8,12 +8,15 @@ import com.aadi.orderservice.repository.OrderRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OrderService {
 
   private final OrderRepository orderRepository;
@@ -30,14 +33,12 @@ public class OrderService {
 
     order.setOrderItems(orderItems);
     orderRepository.save(order);
+    log.info("order {} saved successfuly", order.getOrderNumber());
   }
 
   private OrderItem mapToEntity(OrderItemDto orderItemDto) {
     OrderItem orderItem = new OrderItem();
-    orderItem.setPrice(orderItemDto.getPrice());
-    orderItem.setQuantity(orderItemDto.getQuantity());
-    orderItem.setSkuCode(orderItemDto.getSkuCode());
-
+    BeanUtils.copyProperties(orderItemDto, orderItem);
     return orderItem;
   }
 }
